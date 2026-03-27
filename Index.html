@@ -9,6 +9,7 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
+        /* ===== RESET E ESTILOS ===== */
         * {
             margin: 0;
             padding: 0;
@@ -471,7 +472,7 @@
                             <div class="row align-items-center">
                                 <div class="col-md-8">
                                     <h3 class="card-title">Importar dados</h3>
-                                    <p class="text-muted" style="color:#64748b; margin-bottom: 1rem;">Envie arquivos ZIP, XLSX, XLS ou JSON com os dados de entregas. O sistema detecta automaticamente os cabeçalhos (mesmo que não estejam na primeira linha) e calcula o prazo.</p>
+                                    <p class="text-muted" style="color:#64748b; margin-bottom: 1rem;">Envie arquivos ZIP, XLSX, XLS ou JSON com os dados de entregas. O sistema considera a <strong>segunda linha como cabeçalho</strong> e calcula o prazo automaticamente.</p>
                                     <div class="upload-area" id="uploadArea">
                                         <div class="upload-icon">📂</div>
                                         <div class="upload-text">Arraste e solte ou <strong>clique para selecionar</strong></div>
@@ -659,7 +660,7 @@
         setTimeout(() => toast.remove(), 3000);
     }
 
-    // ===================== LEITURA DE PLANILHAS (HEADER DINÂMICO) =====================
+    // ===================== LEITURA DE PLANILHAS (CABEÇALHO NA LINHA 2) =====================
     async function processFile(file) {
         const ext = file.name.split('.').pop().toLowerCase();
         if (ext === 'zip') return await processZip(file);
@@ -692,21 +693,17 @@
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
-        if (!rows || rows.length < 2) return [];
+        if (!rows || rows.length < 3) return [];
 
-        // Encontra a linha de cabeçalho (procura por palavras-chave nas primeiras 5 linhas)
-        let headerRowIndex = 0;
-        const keywords = ['codigo', 'destino', 'uf', 'região', 'prazo', 'status', 'dt entrega', 'previsao'];
-        for (let i = 0; i < Math.min(5, rows.length); i++) {
-            const row = rows[i];
-            if (row && row.some(cell => cell && keywords.some(k => cell.toString().toLowerCase().includes(k)))) {
-                headerRowIndex = i;
-                break;
-            }
-        }
-
+        // CABEÇALHO NA SEGUNDA LINHA (índice 1)
+        const headerRowIndex = 1;
         const headers = rows[headerRowIndex].map(cell => cell ? String(cell).trim() : '');
         const dataRows = rows.slice(headerRowIndex + 1).filter(row => row.some(cell => cell && cell.toString().trim() !== ''));
+
+        if (dataRows.length === 0) {
+            showToast(`⚠️ Planilha ${fileName} não possui dados após o cabeçalho.`, 'error');
+            return [];
+        }
 
         const records = [];
         for (const row of dataRows) {
@@ -755,6 +752,10 @@
             }
 
             if (record.codigo && record.prazo) records.push(record);
+        }
+
+        if (records.length === 0) {
+            showToast(`⚠️ Nenhum registro válido extraído de ${fileName}. Verifique os cabeçalhos.`, 'error');
         }
         return records;
     }
