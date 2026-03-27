@@ -9,443 +9,68 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        /* ===== RESET E ESTILOS ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: #f4f6fa;
-            color: #1e2a3a;
-            line-height: 1.5;
-        }
-
-        .page {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        .page-wrapper {
-            flex: 1;
-            padding: 1.5rem 0;
-        }
-
-        .container-fluid {
-            width: 100%;
-            padding-right: 1rem;
-            padding-left: 1rem;
-            margin-right: auto;
-            margin-left: auto;
-        }
-
-        /* Header estilo Jadlog */
-        .navbar {
-            background: #ffffff;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border-bottom: 1px solid #e9ecef;
-            padding: 0.75rem 1rem;
-        }
-
-        .navbar-brand {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1.25rem;
-            color: #0066b3;
-        }
-
-        .navbar-brand img {
-            height: 40px;
-            width: auto;
-        }
-
-        .brand-text {
-            background: linear-gradient(135deg, #0066b3, #f7941e);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .navbar-actions .btn {
-            padding: 0.375rem 0.75rem;
-            font-size: 0.875rem;
-            border-radius: 0.375rem;
-        }
-
-        /* Cards */
-        .card {
-            background: #ffffff;
-            border: none;
-            border-radius: 1rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-bottom: 1.5rem;
-        }
-
-        .card:hover {
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-        }
-
-        .card-header {
-            background: transparent;
-            border-bottom: 1px solid #eef2f6;
-            padding: 1rem 1.5rem;
-        }
-
-        .card-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: #1e2a3a;
-        }
-
-        .card-body {
-            padding: 1.5rem;
-        }
-
-        /* Upload area */
-        .upload-area {
-            border: 2px dashed #cbd5e1;
-            border-radius: 1rem;
-            background: #f8fafc;
-            text-align: center;
-            padding: 2rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .upload-area:hover {
-            border-color: #0066b3;
-            background: #f0f9ff;
-        }
-
-        .upload-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .upload-text {
-            color: #64748b;
-            font-size: 0.875rem;
-        }
-
-        .files-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .file-item {
-            background: #eef2f6;
-            border-radius: 2rem;
-            padding: 0.25rem 0.75rem;
-            font-size: 0.75rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .file-item .remove {
-            cursor: pointer;
-            color: #ef4444;
-            font-weight: bold;
-        }
-
-        /* KPIs */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .kpi-card {
-            background: white;
-            border-radius: 1rem;
-            padding: 1.25rem;
-            text-align: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border: 1px solid #eef2f6;
-            transition: all 0.2s;
-        }
-
-        .kpi-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-        }
-
-        .kpi-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            font-weight: 600;
-            color: #64748b;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.5rem;
-        }
-
-        .kpi-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #0066b3;
-            margin-bottom: 0.25rem;
-        }
-
-        .kpi-percent {
-            font-size: 0.875rem;
-            color: #475569;
-        }
-
-        /* Gráficos */
-        .chart-container {
-            background: #ffffff;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            height: 300px;
-            margin-bottom: 1rem;
-        }
-
-        /* Tabs */
-        .nav-tabs {
-            border-bottom: none;
-            gap: 0.5rem;
-        }
-
-        .nav-link {
-            font-weight: 500;
-            color: #475569;
-            border: none;
-            border-radius: 2rem;
-            padding: 0.5rem 1.25rem;
-            transition: all 0.2s;
-            cursor: pointer;
-            background: transparent;
-        }
-
-        .nav-link:hover {
-            color: #0066b3;
-            background-color: #f1f5f9;
-        }
-
-        .nav-link.active {
-            background-color: #0066b3 !important;
-            color: white !important;
-        }
-
-        .tab-pane {
-            padding: 1.5rem 0 0 0;
-            display: none;
-        }
-
-        .tab-pane.active {
-            display: block;
-        }
-
-        /* Filtros */
-        .filters-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            background: #f8fafc;
-            padding: 1rem;
-            border-radius: 0.75rem;
-        }
-
-        .filter-group {
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .filter-group label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: #64748b;
-            margin-bottom: 0.25rem;
-            display: block;
-        }
-
-        .form-select, .form-control {
-            background-color: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
-            padding: 0.5rem 0.75rem;
-            font-size: 0.875rem;
-            color: #1e2a3a;
-            transition: 0.2s;
-            width: 100%;
-        }
-
-        .form-select:focus, .form-control:focus {
-            border-color: #0066b3;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0,102,179,0.1);
-        }
-
-        /* Tabelas */
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.875rem;
-            margin-bottom: 0;
-        }
-
-        .table thead th {
-            background-color: #f8fafc;
-            border-bottom: 1px solid #e2e8f0;
-            font-weight: 600;
-            color: #334155;
-            padding: 0.75rem;
-            text-align: left;
-        }
-
-        .table tbody td {
-            padding: 0.75rem;
-            vertical-align: middle;
-            border-bottom: 1px solid #eef2f6;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: #f1f5f9;
-        }
-
-        .status-dentro {
-            color: #10b981;
-            font-weight: 600;
-        }
-
-        .status-fora {
-            color: #ef4444;
-            font-weight: 600;
-        }
-
-        .progress-bar {
-            background: #e2e8f0;
-            border-radius: 1rem;
-            height: 6px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            background: linear-gradient(90deg, #f97316, #ef4444);
-            height: 100%;
-            border-radius: 1rem;
-        }
-
-        /* Empty state */
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: #64748b;
-        }
-
-        .empty-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.6;
-        }
-
-        /* Botões */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: #0066b3;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0052a0;
-            transform: translateY(-1px);
-        }
-
-        .btn-outline-primary {
-            background: transparent;
-            border: 1px solid #0066b3;
-            color: #0066b3;
-        }
-
-        .btn-outline-primary:hover {
-            background: #0066b3;
-            color: white;
-        }
-
-        .btn-outline-secondary {
-            background: transparent;
-            border: 1px solid #cbd5e1;
-            color: #334155;
-        }
-
-        .btn-outline-secondary:hover {
-            background: #f1f5f9;
-            border-color: #94a3b8;
-        }
-
-        /* Toast */
-        .toast {
-            background: white;
-            border-radius: 0.5rem;
-            padding: 0.75rem 1rem;
-            margin-top: 0.5rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            border-left: 4px solid #10b981;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            color: #1e2a3a;
-            animation: slideIn 0.2s ease;
-        }
-
-        .toast.error {
-            border-left-color: #ef4444;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .kpi-grid {
-                grid-template-columns: 1fr;
-            }
-            .chart-container {
-                height: 250px;
-            }
-            .navbar-brand .brand-text {
-                display: none;
-            }
-            .filters-bar {
-                flex-direction: column;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, sans-serif; background-color: #f4f6fa; color: #1e2a3a; line-height: 1.5; }
+        .page { display: flex; flex-direction: column; min-height: 100vh; }
+        .page-wrapper { flex: 1; padding: 1.5rem 0; }
+        .container-fluid { width: 100%; padding-right: 1rem; padding-left: 1rem; margin: 0 auto; }
+        .navbar { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-bottom: 1px solid #e9ecef; padding: 0.75rem 1rem; }
+        .navbar-brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-weight: 600; font-size: 1.25rem; color: #0066b3; }
+        .navbar-brand img { height: 40px; width: auto; }
+        .brand-text { background: linear-gradient(135deg, #0066b3, #f7941e); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .navbar-actions .btn { padding: 0.375rem 0.75rem; font-size: 0.875rem; border-radius: 0.375rem; }
+        .card { background: #fff; border: none; border-radius: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
+        .card-header { background: transparent; border-bottom: 1px solid #eef2f6; padding: 1rem 1.5rem; }
+        .card-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem; color: #1e2a3a; }
+        .card-body { padding: 1.5rem; }
+        .upload-area { border: 2px dashed #cbd5e1; border-radius: 1rem; background: #f8fafc; text-align: center; padding: 2rem; cursor: pointer; transition: all 0.2s; }
+        .upload-area:hover { border-color: #0066b3; background: #f0f9ff; }
+        .upload-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .upload-text { color: #64748b; font-size: 0.875rem; }
+        .files-container { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+        .file-item { background: #eef2f6; border-radius: 2rem; padding: 0.25rem 0.75rem; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .file-item .remove { cursor: pointer; color: #ef4444; font-weight: bold; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+        .kpi-card { background: white; border-radius: 1rem; padding: 1.25rem; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #eef2f6; }
+        .kpi-label { font-size: 0.75rem; text-transform: uppercase; font-weight: 600; color: #64748b; margin-bottom: 0.5rem; }
+        .kpi-value { font-size: 2rem; font-weight: 700; color: #0066b3; margin-bottom: 0.25rem; }
+        .kpi-percent { font-size: 0.875rem; color: #475569; }
+        .chart-container { background: #fff; border-radius: 0.75rem; padding: 1rem; height: 300px; margin-bottom: 1rem; }
+        .nav-tabs { border-bottom: none; gap: 0.5rem; }
+        .nav-link { font-weight: 500; color: #475569; border: none; border-radius: 2rem; padding: 0.5rem 1.25rem; transition: all 0.2s; cursor: pointer; background: transparent; }
+        .nav-link:hover { color: #0066b3; background-color: #f1f5f9; }
+        .nav-link.active { background-color: #0066b3 !important; color: white !important; }
+        .tab-pane { padding: 1.5rem 0 0 0; display: none; }
+        .tab-pane.active { display: block; }
+        .filters-bar { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; background: #f8fafc; padding: 1rem; border-radius: 0.75rem; }
+        .filter-group { flex: 1; min-width: 150px; }
+        .filter-group label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 0.25rem; display: block; }
+        .form-select, .form-control { background-color: white; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem; color: #1e2a3a; width: 100%; }
+        .form-select:focus, .form-control:focus { border-color: #0066b3; outline: none; box-shadow: 0 0 0 3px rgba(0,102,179,0.1); }
+        .table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        .table thead th { background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #334155; padding: 0.75rem; text-align: left; }
+        .table tbody td { padding: 0.75rem; border-bottom: 1px solid #eef2f6; }
+        .table-hover tbody tr:hover { background-color: #f1f5f9; }
+        .status-dentro { color: #10b981; font-weight: 600; }
+        .status-fora { color: #ef4444; font-weight: 600; }
+        .progress-bar { background: #e2e8f0; border-radius: 1rem; height: 6px; overflow: hidden; }
+        .progress-fill { background: linear-gradient(90deg, #f97316, #ef4444); height: 100%; border-radius: 1rem; }
+        .empty-state { text-align: center; padding: 4rem 2rem; color: #64748b; }
+        .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.6; }
+        .btn { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: all 0.2s; border: none; cursor: pointer; }
+        .btn-primary { background: #0066b3; color: white; }
+        .btn-primary:hover { background: #0052a0; transform: translateY(-1px); }
+        .btn-outline-primary { background: transparent; border: 1px solid #0066b3; color: #0066b3; }
+        .btn-outline-primary:hover { background: #0066b3; color: white; }
+        .btn-outline-secondary { background: transparent; border: 1px solid #cbd5e1; color: #334155; }
+        .btn-outline-secondary:hover { background: #f1f5f9; border-color: #94a3b8; }
+        .toast { background: white; border-radius: 0.5rem; padding: 0.75rem 1rem; margin-top: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 4px solid #10b981; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: #1e2a3a; animation: slideIn 0.2s ease; }
+        .toast.error { border-left-color: #ef4444; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @media (max-width: 768px) { .kpi-grid { grid-template-columns: 1fr; } .chart-container { height: 250px; } .navbar-brand .brand-text { display: none; } .filters-bar { flex-direction: column; } }
     </style>
 </head>
 <body>
-
 <div class="page">
     <header class="navbar">
         <div class="container-fluid">
@@ -464,7 +89,6 @@
 
     <div class="page-wrapper">
         <div class="container-fluid">
-            <!-- Área de importação -->
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="card">
@@ -472,7 +96,7 @@
                             <div class="row align-items-center">
                                 <div class="col-md-8">
                                     <h3 class="card-title">Importar dados</h3>
-                                    <p class="text-muted" style="color:#64748b; margin-bottom: 1rem;">Envie arquivos ZIP, XLSX, XLS ou JSON com os dados de entregas. O sistema considera a <strong>segunda linha como cabeçalho</strong> e calcula o prazo automaticamente.</p>
+                                    <p class="text-muted" style="color:#64748b; margin-bottom: 1rem;">Envie arquivos ZIP, XLSX, XLS ou JSON. A <strong>segunda linha</strong> será considerada cabeçalho. O sistema extrai automaticamente código, destino, UF, datas e status.</p>
                                     <div class="upload-area" id="uploadArea">
                                         <div class="upload-icon">📂</div>
                                         <div class="upload-text">Arraste e solte ou <strong>clique para selecionar</strong></div>
@@ -496,35 +120,22 @@
                 </div>
             </div>
 
-            <!-- KPIs -->
             <div class="row mb-4" id="kpiGrid"></div>
 
-            <!-- Abas e gráficos -->
             <div class="row">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
                             <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" data-tab="overview">Visão Geral</button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" data-tab="unidades">Unidades</button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" data-tab="regioes">Regiões</button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" data-tab="estados">Estados</button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" data-tab="dados">Dados Brutos</button>
-                                </li>
+                                <li class="nav-item"><button class="nav-link active" data-tab="overview">Visão Geral</button></li>
+                                <li class="nav-item"><button class="nav-link" data-tab="unidades">Unidades</button></li>
+                                <li class="nav-item"><button class="nav-link" data-tab="regioes">Regiões</button></li>
+                                <li class="nav-item"><button class="nav-link" data-tab="estados">Estados</button></li>
+                                <li class="nav-item"><button class="nav-link" data-tab="dados">Dados Brutos</button></li>
                             </ul>
                         </div>
                         <div class="card-body">
                             <div class="tab-content">
-                                <!-- Visão Geral -->
                                 <div class="tab-pane active" id="overview">
                                     <div id="emptyState" class="empty-state" style="display: none;">
                                         <div class="empty-icon">📭</div>
@@ -533,88 +144,32 @@
                                     </div>
                                     <div id="overviewContent" style="display: none;">
                                         <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="chart-container">
-                                                    <canvas id="chartRegiao"></canvas>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="chart-container">
-                                                    <canvas id="chartGeral"></canvas>
-                                                </div>
-                                            </div>
+                                            <div class="col-md-6"><div class="chart-container"><canvas id="chartRegiao"></canvas></div></div>
+                                            <div class="col-md-6"><div class="chart-container"><canvas id="chartGeral"></canvas></div></div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Unidades -->
                                 <div class="tab-pane" id="unidades">
                                     <div class="filters-bar">
-                                        <div class="filter-group">
-                                            <label>Região</label>
-                                            <select id="filterRegiao" class="form-select">
-                                                <option value="all">Todas</option>
-                                            </select>
-                                        </div>
-                                        <div class="filter-group">
-                                            <label>UF</label>
-                                            <select id="filterUF" class="form-select">
-                                                <option value="all">Todos</option>
-                                            </select>
-                                        </div>
-                                        <div class="filter-group">
-                                            <label>Prazo</label>
-                                            <select id="filterPrazo" class="form-select">
-                                                <option value="all">Todos</option>
-                                                <option value="Dentro do Prazo">Dentro do Prazo</option>
-                                                <option value="Fora do Prazo">Fora do Prazo</option>
-                                            </select>
-                                        </div>
+                                        <div class="filter-group"><label>Região</label><select id="filterRegiao" class="form-select"><option value="all">Todas</option></select></div>
+                                        <div class="filter-group"><label>UF</label><select id="filterUF" class="form-select"><option value="all">Todos</option></select></div>
+                                        <div class="filter-group"><label>Prazo</label><select id="filterPrazo" class="form-select"><option value="all">Todos</option><option value="Dentro do Prazo">Dentro do Prazo</option><option value="Fora do Prazo">Fora do Prazo</option></select></div>
                                     </div>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr><th>Unidade</th><th>Total</th><th>No Prazo</th><th>Atrasadas</th><th>% Atraso</th><th>Região</th><th>UF</th></tr>
-                                            </thead>
-                                            <tbody id="unidadesBody"></tbody>
-                                        </table>
-                                    </div>
+                                    <div class="table-responsive"><table class="table table-hover"><thead><tr><th>Unidade</th><th>Total</th><th>No Prazo</th><th>Atrasadas</th><th>% Atraso</th><th>Região</th><th>UF</th></tr></thead><tbody id="unidadesBody"></tbody></table></div>
                                 </div>
 
-                                <!-- Regiões -->
                                 <div class="tab-pane" id="regioes">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead><tr><th>Região</th><th>Total</th><th>No Prazo</th><th>Atrasadas</th><th>% Atraso</th><th>Progresso</th></tr></thead>
-                                            <tbody id="regioesBody"></tbody>
-                                        </table>
-                                    </div>
+                                    <div class="table-responsive"><table class="table table-hover"><thead><tr><th>Região</th><th>Total</th><th>No Prazo</th><th>Atrasadas</th><th>% Atraso</th><th>Progresso</th></tr></thead><tbody id="regioesBody"></tbody></table></div>
                                 </div>
 
-                                <!-- Estados -->
                                 <div class="tab-pane" id="estados">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead><tr><th>Estado (UF)</th><th>Total</th><th>No Prazo</th><th>Atrasadas</th><th>% Atraso</th><th>Progresso</th></tr></thead>
-                                            <tbody id="estadosBody"></tbody>
-                                        </table>
-                                    </div>
+                                    <div class="table-responsive"><table class="table table-hover"><thead><tr><th>Estado (UF)</th><th>Total</th><th>No Prazo</th><th>Atrasadas</th><th>% Atraso</th><th>Progresso</th></tr></thead><tbody id="estadosBody"></tbody></table></div>
                                 </div>
 
-                                <!-- Dados Brutos -->
                                 <div class="tab-pane" id="dados">
-                                    <div class="filters-bar">
-                                        <div class="filter-group">
-                                            <label>Buscar por Código</label>
-                                            <input type="text" id="searchCodigo" class="form-control" placeholder="Digite o código...">
-                                        </div>
-                                    </div>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead><tr><th>Código</th><th>Destino</th><th>UF</th><th>Região</th><th>Prazo</th><th>Status</th><th>Arquivo</th></tr></thead>
-                                            <tbody id="dadosBody"></tbody>
-                                        </table>
-                                    </div>
+                                    <div class="filters-bar"><div class="filter-group"><label>Buscar por Código</label><input type="text" id="searchCodigo" class="form-control" placeholder="Digite o código..."></div></div>
+                                    <div class="table-responsive"><table class="table table-hover"><thead><tr><th>Código</th><th>Destino</th><th>UF</th><th>Região</th><th>Prazo</th><th>Status</th><th>Arquivo</th></tr></thead><tbody id="dadosBody"></tbody></table></div>
                                 </div>
                             </div>
                         </div>
@@ -624,16 +179,11 @@
         </div>
     </div>
 </div>
-
 <div id="toastContainer" style="position: fixed; bottom: 1rem; right: 1rem; z-index: 1060;"></div>
 
 <script>
-    // ===================== ESTADO GLOBAL =====================
-    let allData = [];
-    let loadedFiles = [];
-    let charts = {};
+    let allData = [], loadedFiles = [], charts = {};
 
-    // ===================== DOM Elements =====================
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('fileInput');
     const selectFileBtn = document.getElementById('selectFileBtn');
@@ -650,21 +200,30 @@
     const filterPrazo = document.getElementById('filterPrazo');
     const searchCodigo = document.getElementById('searchCodigo');
 
-    // ===================== FUNÇÕES DE NOTIFICAÇÃO =====================
-    function showToast(message, type = 'success') {
-        const container = document.getElementById('toastContainer');
+    function showToast(msg, type='success') {
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
-        toast.innerHTML = `<span>${message}</span>`;
-        container.appendChild(toast);
+        toast.innerHTML = `<span>${msg}</span>`;
+        document.getElementById('toastContainer').appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
 
-    // ===================== LEITURA DE PLANILHAS (CABEÇALHO NA LINHA 2) =====================
+    // Mapeia UF para região (pode ser ajustado)
+    function ufToRegiao(uf) {
+        const regioes = {
+            'AC': 'Norte', 'AP': 'Norte', 'AM': 'Norte', 'PA': 'Norte', 'RO': 'Norte', 'RR': 'Norte', 'TO': 'Norte',
+            'AL': 'Nordeste', 'BA': 'Nordeste', 'CE': 'Nordeste', 'MA': 'Nordeste', 'PB': 'Nordeste', 'PE': 'Nordeste', 'PI': 'Nordeste', 'RN': 'Nordeste', 'SE': 'Nordeste',
+            'DF': 'Centro-Oeste', 'GO': 'Centro-Oeste', 'MT': 'Centro-Oeste', 'MS': 'Centro-Oeste',
+            'ES': 'Sudeste', 'MG': 'Sudeste', 'RJ': 'Sudeste', 'SP': 'Sudeste',
+            'PR': 'Sul', 'RS': 'Sul', 'SC': 'Sul'
+        };
+        return regioes[uf.toUpperCase()] || 'Outros';
+    }
+
     async function processFile(file) {
         const ext = file.name.split('.').pop().toLowerCase();
         if (ext === 'zip') return await processZip(file);
-        if (['xlsx', 'xls'].includes(ext)) return await processExcelFile(file);
+        if (['xlsx','xls'].includes(ext)) return await processExcelFile(file);
         if (ext === 'json') return await processJsonFile(file);
         return [];
     }
@@ -672,15 +231,15 @@
     async function processZip(file) {
         const zip = new JSZip();
         const zipContent = await zip.loadAsync(file);
-        let allRecords = [];
+        let all = [];
         for (const [name, zipEntry] of Object.entries(zipContent.files)) {
             if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
                 const data = await zipEntry.async('arraybuffer');
-                const records = await parseExcelArrayBuffer(data, name);
-                allRecords.push(...records);
+                const recs = await parseExcelArrayBuffer(data, name);
+                all.push(...recs);
             }
         }
-        return allRecords;
+        return all;
     }
 
     async function processExcelFile(file) {
@@ -695,27 +254,19 @@
         const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
         if (!rows || rows.length < 3) return [];
 
-        // CABEÇALHO NA SEGUNDA LINHA (índice 1)
-        const headerRowIndex = 1;
-        const headers = rows[headerRowIndex].map(cell => cell ? String(cell).trim() : '');
-        const dataRows = rows.slice(headerRowIndex + 1).filter(row => row.some(cell => cell && cell.toString().trim() !== ''));
-
-        if (dataRows.length === 0) {
-            showToast(`⚠️ Planilha ${fileName} não possui dados após o cabeçalho.`, 'error');
-            return [];
-        }
+        // Cabeçalho na segunda linha (índice 1)
+        const headerRow = rows[1].map(cell => cell ? String(cell).trim() : '');
+        const dataRows = rows.slice(2).filter(row => row.some(cell => cell && cell.toString().trim() !== ''));
 
         const records = [];
         for (const row of dataRows) {
             const obj = {};
-            headers.forEach((h, idx) => {
+            headerRow.forEach((h, idx) => {
                 const key = h.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                 let val = row[idx] !== undefined ? String(row[idx]).trim() : '';
-                if (key.includes('codigo')) obj.codigo = val;
-                else if (key.includes('destino')) obj.destino = val;
+                if (key === 'codigo') obj.codigo = val;
+                else if (key === 'destino') obj.destino = val;
                 else if (key === 'uf') obj.uf = val;
-                else if (key.includes('regiao')) obj.regiao = val;
-                else if (key === 'prazo') obj.prazoRaw = val;
                 else if (key.includes('status')) obj.status = val;
                 else if (key.includes('dt entrega')) obj.dtEntrega = val;
                 else if (key.includes('previsao')) obj.previsao = val;
@@ -725,19 +276,16 @@
                 codigo: obj.codigo || '',
                 destino: obj.destino || '',
                 uf: obj.uf || '',
-                regiao: obj.regiao || '',
                 status: obj.status || '',
                 prazo: '',
                 arquivo: fileName
             };
 
-            // Determina prazo
-            if (obj.prazoRaw) {
-                const p = obj.prazoRaw.toLowerCase();
-                if (p.includes('fora')) record.prazo = 'Fora do Prazo';
-                else if (p.includes('dentro')) record.prazo = 'Dentro do Prazo';
-            }
-            if (!record.prazo && obj.dtEntrega && obj.previsao) {
+            // Deriva região a partir da UF
+            record.regiao = record.uf ? ufToRegiao(record.uf) : '';
+
+            // Calcula prazo
+            if (obj.dtEntrega && obj.previsao) {
                 try {
                     const entrega = new Date(obj.dtEntrega);
                     const previsao = new Date(obj.previsao);
@@ -754,9 +302,7 @@
             if (record.codigo && record.prazo) records.push(record);
         }
 
-        if (records.length === 0) {
-            showToast(`⚠️ Nenhum registro válido extraído de ${fileName}. Verifique os cabeçalhos.`, 'error');
-        }
+        if (records.length === 0) showToast(`⚠️ Nenhum registro válido em ${fileName}`, 'error');
         return records;
     }
 
@@ -764,60 +310,44 @@
         return new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (Array.isArray(data)) resolve(data);
-                    else resolve([]);
-                } catch { resolve([]); }
+                try { resolve(JSON.parse(e.target.result) || []); } catch { resolve([]); }
             };
             reader.readAsText(file);
         });
     }
 
-    // ===================== UPLOAD =====================
     async function loadFile(file) {
         try {
             const records = await processFile(file);
             if (records.length) {
                 allData.push(...records);
                 loadedFiles.push(file.name);
-                showToast(`✅ ${file.name}: ${records.length} registros carregados`);
+                showToast(`✅ ${file.name}: ${records.length} registros`);
                 updateUI();
-            } else {
-                showToast(`⚠️ Nenhum dado válido em ${file.name}`, 'error');
-            }
-        } catch (err) {
-            console.error(err);
-            showToast(`❌ Erro ao processar ${file.name}`, 'error');
-        }
+            } else showToast(`⚠️ Nenhum dado válido em ${file.name}`, 'error');
+        } catch (err) { showToast(`❌ Erro em ${file.name}`, 'error'); }
     }
 
     uploadArea.addEventListener('click', () => fileInput.click());
-    uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
     uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
-    uploadArea.addEventListener('drop', async (e) => {
+    uploadArea.addEventListener('drop', async e => {
         e.preventDefault();
         uploadArea.classList.remove('dragover');
-        const files = e.dataTransfer.files;
-        for (const f of files) await loadFile(f);
+        for (const f of e.dataTransfer.files) await loadFile(f);
     });
-    fileInput.addEventListener('change', async (e) => {
+    fileInput.addEventListener('change', async e => {
         for (const f of e.target.files) await loadFile(f);
         fileInput.value = '';
     });
     selectFileBtn.addEventListener('click', () => fileInput.click());
 
-    // ===================== ATUALIZAÇÃO DA UI =====================
     function updateUI() {
         const empty = allData.length === 0;
         emptyState.style.display = empty ? 'block' : 'none';
         overviewContent.style.display = empty ? 'none' : 'block';
         filesListDiv.style.display = loadedFiles.length ? 'block' : 'none';
-        if (empty) {
-            kpiGrid.innerHTML = '';
-            return;
-        }
-
+        if (empty) { kpiGrid.innerHTML = ''; return; }
         updateKPIs();
         updateCharts();
         updateTables();
@@ -831,29 +361,17 @@
         const dentro = allData.filter(r => r.prazo === 'Dentro do Prazo').length;
         const fora = total - dentro;
         kpiGrid.innerHTML = `
-            <div class="kpi-card">
-                <div class="kpi-label">Total de Remessas</div>
-                <div class="kpi-value">${total.toLocaleString('pt-BR')}</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">No Prazo</div>
-                <div class="kpi-value" style="color:#10b981;">${dentro.toLocaleString('pt-BR')}</div>
-                <div class="kpi-percent">${((dentro/total)*100).toFixed(1)}%</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Fora do Prazo</div>
-                <div class="kpi-value" style="color:#ef4444;">${fora.toLocaleString('pt-BR')}</div>
-                <div class="kpi-percent">${((fora/total)*100).toFixed(1)}%</div>
-            </div>
+            <div class="kpi-card"><div class="kpi-label">Total de Remessas</div><div class="kpi-value">${total.toLocaleString('pt-BR')}</div></div>
+            <div class="kpi-card"><div class="kpi-label">No Prazo</div><div class="kpi-value" style="color:#10b981;">${dentro.toLocaleString('pt-BR')}</div><div class="kpi-percent">${((dentro/total)*100).toFixed(1)}%</div></div>
+            <div class="kpi-card"><div class="kpi-label">Fora do Prazo</div><div class="kpi-value" style="color:#ef4444;">${fora.toLocaleString('pt-BR')}</div><div class="kpi-percent">${((fora/total)*100).toFixed(1)}%</div></div>
         `;
     }
 
     function updateCharts() {
-        // Região
         const regioes = {};
         allData.forEach(r => {
             if (!r.regiao) return;
-            if (!regioes[r.regiao]) regioes[r.regiao] = { dentro: 0, fora: 0 };
+            if (!regioes[r.regiao]) regioes[r.regiao] = { dentro:0, fora:0 };
             if (r.prazo === 'Dentro do Prazo') regioes[r.regiao].dentro++;
             else if (r.prazo === 'Fora do Prazo') regioes[r.regiao].fora++;
         });
@@ -862,40 +380,23 @@
         const foraData = labels.map(l => regioes[l].fora);
 
         if (charts.chartRegiao) charts.chartRegiao.destroy();
-        const ctxRegiao = document.getElementById('chartRegiao').getContext('2d');
-        charts.chartRegiao = new Chart(ctxRegiao, {
-            type: 'bar',
-            data: {
-                labels,
-                datasets: [
-                    { label: 'No Prazo', data: dentroData, backgroundColor: '#10b981' },
-                    { label: 'Fora do Prazo', data: foraData, backgroundColor: '#ef4444' }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'top' } }
-            }
+        charts.chartRegiao = new Chart(document.getElementById('chartRegiao'), {
+            type: 'bar', data: { labels, datasets: [
+                { label: 'No Prazo', data: dentroData, backgroundColor: '#10b981' },
+                { label: 'Fora do Prazo', data: foraData, backgroundColor: '#ef4444' }
+            ]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
         });
 
-        // Geral
         const totalDentro = allData.filter(r => r.prazo === 'Dentro do Prazo').length;
         const totalFora = allData.length - totalDentro;
         if (charts.chartGeral) charts.chartGeral.destroy();
-        const ctxGeral = document.getElementById('chartGeral').getContext('2d');
-        charts.chartGeral = new Chart(ctxGeral, {
-            type: 'doughnut',
-            data: {
-                labels: ['No Prazo', 'Fora do Prazo'],
-                datasets: [{ data: [totalDentro, totalFora], backgroundColor: ['#10b981', '#ef4444'] }]
-            },
+        charts.chartGeral = new Chart(document.getElementById('chartGeral'), {
+            type: 'doughnut', data: { labels: ['No Prazo', 'Fora do Prazo'], datasets: [{ data: [totalDentro, totalFora], backgroundColor: ['#10b981', '#ef4444'] }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
         });
     }
 
     function updateTables() {
-        // Unidades
         const unidadeMap = new Map();
         allData.forEach(r => {
             if (!r.destino) return;
@@ -908,11 +409,10 @@
         let unidadesHtml = '';
         Array.from(unidadeMap.entries()).sort((a,b) => b[1].fora - a[1].fora).forEach(([nome, s]) => {
             const pct = ((s.fora/s.total)*100).toFixed(1);
-            unidadesHtml += `<tr><td>${nome}</td><td>${s.total}</td><td class="status-dentro">${s.dentro}</td><td class="status-fora">${s.fora}</td><td>${pct}%</td><td>${s.regiao || '-'}</td><td>${s.uf || '-'}</td></tr>`;
+            unidadesHtml += `<tr><td>${nome}</td><td>${s.total}</td><td class="status-dentro">${s.dentro}</td><td class="status-fora">${s.fora}</td><td>${pct}%</td><td>${s.regiao||'-'}</td><td>${s.uf||'-'}</td></tr>`;
         });
         document.getElementById('unidadesBody').innerHTML = unidadesHtml;
 
-        // Regiões
         const regMap = {};
         allData.forEach(r => {
             if (!r.regiao) return;
@@ -928,7 +428,6 @@
         });
         document.getElementById('regioesBody').innerHTML = regHtml;
 
-        // Estados
         const ufMap = {};
         allData.forEach(r => {
             if (!r.uf) return;
@@ -958,9 +457,7 @@
 
     function updateFilesList() {
         let html = '';
-        loadedFiles.forEach((f, i) => {
-            html += `<div class="file-item">${f} <span class="remove" onclick="removeFile(${i})">✕</span></div>`;
-        });
+        loadedFiles.forEach((f, i) => html += `<div class="file-item">${f} <span class="remove" onclick="removeFile(${i})">✕</span></div>`);
         filesContainer.innerHTML = html;
     }
     window.removeFile = (idx) => { loadedFiles.splice(idx,1); updateFilesList(); };
@@ -970,7 +467,6 @@
         const uf = filterUF.value;
         const prazo = filterPrazo.value;
         const search = searchCodigo.value.toLowerCase();
-
         const filtered = allData.filter(r => {
             if (regiao !== 'all' && r.regiao !== regiao) return false;
             if (uf !== 'all' && r.uf !== uf) return false;
@@ -978,7 +474,6 @@
             if (search && !r.codigo.toLowerCase().includes(search)) return false;
             return true;
         });
-
         let dadosHtml = '';
         filtered.slice(0, 200).forEach(r => {
             const statusClass = r.prazo === 'Dentro do Prazo' ? 'status-dentro' : 'status-fora';
@@ -987,39 +482,27 @@
         document.getElementById('dadosBody').innerHTML = dadosHtml;
     }
 
-    // ===================== EXPORT / CLEAR =====================
     function exportXLSX() {
-        if (!allData.length) return showToast('Nenhum dado para exportar', 'error');
+        if (!allData.length) return showToast('Nenhum dado', 'error');
         const ws = XLSX.utils.json_to_sheet(allData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Performance');
         XLSX.writeFile(wb, `performance_${new Date().toISOString().slice(0,10)}.xlsx`);
         showToast('✅ Exportado XLSX');
     }
-
     function exportJSON() {
-        if (!allData.length) return showToast('Nenhum dado para exportar', 'error');
+        if (!allData.length) return showToast('Nenhum dado', 'error');
         const json = JSON.stringify(allData, null, 2);
         const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `performance_${new Date().toISOString().slice(0,10)}.json`;
-        a.click();
+        const a = document.createElement('a'); a.href = url; a.download = `performance_${new Date().toISOString().slice(0,10)}.json`; a.click();
         URL.revokeObjectURL(url);
         showToast('✅ Exportado JSON');
     }
-
     function clearAllData() {
-        if (confirm('Limpar todos os dados carregados?')) {
-            allData = [];
-            loadedFiles = [];
-            updateUI();
-            showToast('Dados removidos');
-        }
+        if (confirm('Limpar todos os dados?')) { allData = []; loadedFiles = []; updateUI(); showToast('Dados removidos'); }
     }
 
-    // ===================== EVENT LISTENERS =====================
     exportXLSXBtn.addEventListener('click', exportXLSX);
     exportJSONBtn.addEventListener('click', exportJSON);
     clearDataBtn.addEventListener('click', clearAllData);
@@ -1028,16 +511,15 @@
     filterPrazo.addEventListener('change', applyFilters);
     searchCodigo.addEventListener('input', applyFilters);
 
-    // ===================== INICIALIZAÇÃO DE ABAS =====================
     function initTabs() {
-        const tabButtons = document.querySelectorAll('.nav-link');
-        const tabPanes = document.querySelectorAll('.tab-pane');
-        tabButtons.forEach(btn => {
+        const btns = document.querySelectorAll('.nav-link');
+        const panes = document.querySelectorAll('.tab-pane');
+        btns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const tabId = btn.getAttribute('data-tab');
-                tabPanes.forEach(pane => pane.classList.remove('active'));
+                panes.forEach(p => p.classList.remove('active'));
                 document.getElementById(tabId).classList.add('active');
-                tabButtons.forEach(b => b.classList.remove('active'));
+                btns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
             });
         });
