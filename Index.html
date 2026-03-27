@@ -2,1075 +2,225 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Performance de Entregas</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Dashboard Jadlog | Performance de Entregas</title>
+    <!-- Favicon (opcional) -->
+    <link rel="icon" type="image/x-icon" href="https://www.jadlog.com.br/jadlog/img/favicon.ico">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <!-- SheetJS (XLSX) e JSZip -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: #e2e8f0;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        header {
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #60a5fa, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .subtitle {
-            color: #94a3b8;
-            font-size: 1em;
-        }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .sidebar {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            border-radius: 12px;
-            padding: 20px;
-            height: fit-content;
-            backdrop-filter: blur(10px);
-        }
-
-        .sidebar h3 {
-            font-size: 0.9em;
-            text-transform: uppercase;
-            color: #64748b;
-            margin-bottom: 15px;
-            letter-spacing: 1px;
-        }
-
-        .upload-area {
-            border: 2px dashed rgba(59, 130, 246, 0.5);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: rgba(59, 130, 246, 0.05);
-        }
-
-        .upload-area:hover {
-            border-color: #3b82f6;
-            background: rgba(59, 130, 246, 0.1);
-        }
-
-        .upload-area.dragover {
-            border-color: #60a5fa;
-            background: rgba(59, 130, 246, 0.15);
-        }
-
-        .upload-icon {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-
-        .upload-text {
-            font-size: 0.85em;
-            color: #94a3b8;
-            margin-bottom: 10px;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        .btn {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.9em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.4);
-        }
-
-        .btn-secondary {
-            background: rgba(148, 163, 184, 0.1);
-            color: #94a3b8;
-            border: 1px solid rgba(148, 163, 184, 0.3);
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(148, 163, 184, 0.2);
-        }
-
-        .files-list {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(148, 163, 184, 0.2);
-        }
-
-        .files-list h4 {
-            font-size: 0.85em;
-            color: #64748b;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        .file-item {
-            background: rgba(59, 130, 246, 0.1);
-            border-left: 3px solid #3b82f6;
-            padding: 8px 12px;
-            margin-bottom: 8px;
-            border-radius: 4px;
-            font-size: 0.85em;
-            color: #cbd5e1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .file-item .remove {
-            color: #f87171;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .content {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-            overflow: hidden;
-        }
-
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-            background: rgba(15, 23, 42, 0.5);
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 15px 20px;
-            background: none;
-            border: none;
-            color: #94a3b8;
-            cursor: pointer;
-            font-size: 0.95em;
-            transition: all 0.3s ease;
-            border-bottom: 2px solid transparent;
-        }
-
-        .tab-btn.active {
-            color: #60a5fa;
-            border-bottom-color: #3b82f6;
-        }
-
-        .tab-btn:hover {
-            color: #cbd5e1;
-        }
-
-        .tab-content {
-            display: none;
-            padding: 30px;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .kpi-card {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1));
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .kpi-label {
-            font-size: 0.85em;
-            color: #94a3b8;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        .kpi-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #60a5fa;
-            margin-bottom: 5px;
-        }
-
-        .kpi-percent {
-            font-size: 0.9em;
-            color: #64748b;
-        }
-
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .chart-container {
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            border-radius: 8px;
-            padding: 20px;
-            position: relative;
-            height: 300px;
-        }
-
-        .chart-title {
-            font-size: 0.95em;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #cbd5e1;
-        }
-
-        .filters {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .filter-group label {
-            font-size: 0.85em;
-            color: #94a3b8;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
-
-        select, input[type="text"] {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(148, 163, 184, 0.3);
-            color: #e2e8f0;
-            padding: 10px 12px;
-            border-radius: 6px;
-            font-size: 0.9em;
-        }
-
-        select:focus, input[type="text"]:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .table-container {
-            overflow-x: auto;
-            border-radius: 8px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9em;
-        }
-
-        th {
-            background: rgba(15, 23, 42, 0.8);
-            padding: 12px;
-            text-align: left;
-            color: #94a3b8;
-            font-weight: 600;
-            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-            cursor: pointer;
-            user-select: none;
-        }
-
-        th:hover {
-            background: rgba(59, 130, 246, 0.1);
-        }
-
-        td {
-            padding: 12px;
-            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-        }
-
-        tr:hover {
-            background: rgba(59, 130, 246, 0.05);
-        }
-
-        .status-dentro {
-            color: #10b981;
-            font-weight: 600;
-        }
-
-        .status-fora {
-            color: #f87171;
-            font-weight: 600;
-        }
-
-        .progress-bar {
-            background: rgba(148, 163, 184, 0.2);
-            border-radius: 4px;
-            height: 6px;
-            overflow: hidden;
-            margin-top: 8px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #f87171, #ef4444);
-            transition: width 0.3s ease;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #64748b;
-        }
-
-        .empty-icon {
-            font-size: 3em;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        .export-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .export-buttons .btn {
-            flex: 1;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(30, 41, 59, 0.95);
-            border: 1px solid rgba(148, 163, 184, 0.3);
-            color: #e2e8f0;
-            padding: 15px 20px;
-            border-radius: 6px;
-            backdrop-filter: blur(10px);
-            animation: slideIn 0.3s ease;
-            z-index: 1000;
-        }
-
-        .toast.success {
-            border-left: 4px solid #10b981;
-        }
-
-        .toast.error {
-            border-left: 4px solid #f87171;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .kpi-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-
-            h1 {
-                font-size: 1.8em;
-            }
-        }
-    </style>
+    <!-- CSS do projeto -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>📦 Dashboard de Performance</h1>
-            <p class="subtitle">Análise de Entregas Dentro e Fora do Prazo</p>
-        </header>
 
-        <div class="main-grid">
-            <div class="sidebar">
-                <h3>📁 Importar Dados</h3>
-                <div class="upload-area" id="uploadArea">
-                    <div class="upload-icon">📤</div>
-                    <div class="upload-text">Arraste arquivos aqui ou clique para selecionar</div>
-                    <small style="color: #64748b;">ZIP, XLSX, XLS ou JSON</small>
-                </div>
-                <input type="file" id="fileInput" multiple accept=".zip,.xlsx,.xls,.json">
-                
-                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-                    Selecionar Arquivo
+<div class="page">
+    <!-- Header com logo Jadlog -->
+    <header class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="https://www.jadlog.com.br/jadlog/img/logo_home_mob.png" alt="Jadlog" height="40">
+                <span class="brand-text">Performance de Entregas</span>
+            </a>
+            <div class="navbar-actions">
+                <button class="btn btn-outline-primary" id="btnClearData" title="Limpar todos os dados">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                    Limpar
                 </button>
+            </div>
+        </div>
+    </header>
 
-                <button class="btn btn-secondary" onclick="exportXLSX()">
-                    📥 Exportar XLSX
-                </button>
-
-                <button class="btn btn-secondary" onclick="exportJSON()">
-                    📥 Exportar JSON
-                </button>
-
-                <button class="btn btn-secondary" onclick="clearAllData()">
-                    🗑️ Limpar Dados
-                </button>
-
-                <div class="files-list" id="filesList" style="display: none;">
-                    <h4>Arquivos Carregados</h4>
-                    <div id="filesContainer"></div>
+    <div class="page-wrapper">
+        <div class="container-fluid">
+            <!-- Área de importação (card) -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h3 class="card-title">Importar dados</h3>
+                                    <p class="text-muted">Envie arquivos ZIP, XLSX, XLS ou JSON com os dados de entregas. O sistema detecta automaticamente os cabeçalhos (mesmo que não estejam na primeira linha) e calcula o prazo.</p>
+                                    <div class="upload-area" id="uploadArea">
+                                        <div class="upload-icon">📂</div>
+                                        <div class="upload-text">Arraste e solte ou <strong>clique para selecionar</strong></div>
+                                        <input type="file" id="fileInput" multiple accept=".zip,.xlsx,.xls,.json" style="display: none;">
+                                        <button class="btn btn-primary mt-3" id="selectFileBtn">Selecionar arquivos</button>
+                                    </div>
+                                    <div id="filesList" class="mt-3" style="display: none;">
+                                        <h6>Arquivos carregados</h6>
+                                        <div id="filesContainer" class="files-container"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                    <div class="btn-group-vertical w-100">
+                                        <button class="btn btn-outline-secondary mb-2" id="exportXLSXBtn">
+                                            📥 Exportar XLSX
+                                        </button>
+                                        <button class="btn btn-outline-secondary" id="exportJSONBtn">
+                                            📄 Exportar JSON
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="content">
-                <div class="tabs">
-                    <button class="tab-btn active" onclick="switchTab('overview')">📊 Visão Geral</button>
-                    <button class="tab-btn" onclick="switchTab('unidades')">🏢 Unidades</button>
-                    <button class="tab-btn" onclick="switchTab('regioes')">🗺️ Regiões</button>
-                    <button class="tab-btn" onclick="switchTab('estados')">📍 Estados</button>
-                    <button class="tab-btn" onclick="switchTab('dados')">📋 Dados Brutos</button>
-                </div>
+            <!-- KPIs -->
+            <div class="row mb-4" id="kpiGrid">
+                <!-- Será preenchido via JS -->
+            </div>
 
-                <!-- TAB: Visão Geral -->
-                <div id="overview" class="tab-content active">
-                    <div id="emptyState" class="empty-state" style="display: none;">
-                        <div class="empty-icon">📦</div>
-                        <h3>Nenhum dado carregado</h3>
-                        <p>Importe arquivos ZIP, XLSX ou JSON para começar a análise</p>
-                    </div>
+            <!-- Gráficos e abas -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <ul class="nav nav-tabs card-header-tabs" id="dashboardTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="overview-tab" data-bs-target="#overview" type="button" role="tab">Visão Geral</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="unidades-tab" data-bs-target="#unidades" type="button" role="tab">Unidades</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="regioes-tab" data-bs-target="#regioes" type="button" role="tab">Regiões</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="estados-tab" data-bs-target="#estados" type="button" role="tab">Estados</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="dados-tab" data-bs-target="#dados" type="button" role="tab">Dados Brutos</button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content">
+                                <!-- Visão Geral -->
+                                <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                                    <div id="emptyState" class="empty-state" style="display: none;">
+                                        <div class="empty-icon">📭</div>
+                                        <h3>Nenhum dado carregado</h3>
+                                        <p>Importe arquivos ZIP, XLSX ou JSON para iniciar a análise.</p>
+                                    </div>
+                                    <div id="overviewContent" style="display: none;">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="chart-container">
+                                                    <canvas id="chartRegiao"></canvas>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="chart-container">
+                                                    <canvas id="chartGeral"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                    <div id="overviewContent" style="display: none;">
-                        <div class="kpi-grid" id="kpiGrid"></div>
-                        <div class="charts-grid">
-                            <div class="chart-container">
-                                <div class="chart-title">Distribuição por Região</div>
-                                <canvas id="chartRegiao"></canvas>
+                                <!-- Unidades -->
+                                <div class="tab-pane fade" id="unidades" role="tabpanel">
+                                    <div class="filters-bar">
+                                        <div class="filter-group">
+                                            <label>Região</label>
+                                            <select id="filterRegiao" class="form-select">
+                                                <option value="all">Todas</option>
+                                            </select>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label>UF</label>
+                                            <select id="filterUF" class="form-select">
+                                                <option value="all">Todos</option>
+                                            </select>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label>Prazo</label>
+                                            <select id="filterPrazo" class="form-select">
+                                                <option value="all">Todos</option>
+                                                <option value="Dentro do Prazo">Dentro do Prazo</option>
+                                                <option value="Fora do Prazo">Fora do Prazo</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover" id="unidadesTable">
+                                            <thead>
+                                                <tr>
+                                                    <th data-col="0">Unidade</th>
+                                                    <th data-col="1">Total</th>
+                                                    <th data-col="2">No Prazo</th>
+                                                    <th data-col="3">Atrasadas</th>
+                                                    <th data-col="4">% Atraso</th>
+                                                    <th>Região</th>
+                                                    <th>UF</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="unidadesBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Regiões -->
+                                <div class="tab-pane fade" id="regioes" role="tabpanel">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr><th>Região</th><th>Total</th><th>No Prazo</th><th>Atrasadas</th><th>% Atraso</th><th>Progresso</th></tr>
+                                            </thead>
+                                            <tbody id="regioesBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Estados -->
+                                <div class="tab-pane fade" id="estados" role="tabpanel">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr><th>Estado (UF)</th><th>Total</th><th>No Prazo</th><th>Atrasadas</th><th>% Atraso</th><th>Progresso</th></tr>
+                                            </thead>
+                                            <tbody id="estadosBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Dados Brutos -->
+                                <div class="tab-pane fade" id="dados" role="tabpanel">
+                                    <div class="filters-bar">
+                                        <div class="filter-group">
+                                            <label>Buscar por Código</label>
+                                            <input type="text" id="searchCodigo" class="form-control" placeholder="Digite o código...">
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr><th>Código</th><th>Destino</th><th>UF</th><th>Região</th><th>Prazo</th><th>Status</th><th>Arquivo</th></tr>
+                                            </thead>
+                                            <tbody id="dadosBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="chart-container">
-                                <div class="chart-title">Distribuição Geral</div>
-                                <canvas id="chartGeral"></canvas>
-                            </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- TAB: Unidades -->
-                <div id="unidades" class="tab-content">
-                    <div class="filters">
-                        <div class="filter-group">
-                            <label>Região</label>
-                            <select id="filterRegiao" onchange="applyFilters()">
-                                <option value="all">Todas</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>UF</label>
-                            <select id="filterUF" onchange="applyFilters()">
-                                <option value="all">Todos</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Prazo</label>
-                            <select id="filterPrazo" onchange="applyFilters()">
-                                <option value="all">Todos</option>
-                                <option value="Dentro do Prazo">Dentro do Prazo</option>
-                                <option value="Fora do Prazo">Fora do Prazo</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="table-container">
-                        <table id="unidadesTable">
-                            <thead>
-                                <tr>
-                                    <th onclick="sortTable('unidades', 0)">Unidade</th>
-                                    <th onclick="sortTable('unidades', 1)">Total</th>
-                                    <th onclick="sortTable('unidades', 2)">No Prazo</th>
-                                    <th onclick="sortTable('unidades', 3)">Atrasadas</th>
-                                    <th onclick="sortTable('unidades', 4)">% Atraso</th>
-                                    <th>Região</th>
-                                    <th>UF</th>
-                                </tr>
-                            </thead>
-                            <tbody id="unidadesBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- TAB: Regiões -->
-                <div id="regioes" class="tab-content">
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Região</th>
-                                    <th>Total</th>
-                                    <th>No Prazo</th>
-                                    <th>Atrasadas</th>
-                                    <th>% Atraso</th>
-                                    <th>Progresso</th>
-                                </tr>
-                            </thead>
-                            <tbody id="regioesBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- TAB: Estados -->
-                <div id="estados" class="tab-content">
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Estado (UF)</th>
-                                    <th>Total</th>
-                                    <th>No Prazo</th>
-                                    <th>Atrasadas</th>
-                                    <th>% Atraso</th>
-                                    <th>Progresso</th>
-                                </tr>
-                            </thead>
-                            <tbody id="estadosBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- TAB: Dados Brutos -->
-                <div id="dados" class="tab-content">
-                    <div class="filters">
-                        <div class="filter-group">
-                            <label>Buscar por Código</label>
-                            <input type="text" id="searchCodigo" placeholder="Digite o código..." onkeyup="applyFilters()">
-                        </div>
-                    </div>
-                    <div class="table-container">
-                        <table id="dadosTable">
-                            <thead>
-                                <tr>
-                                    <th>Código</th>
-                                    <th>Destino</th>
-                                    <th>UF</th>
-                                    <th>Região</th>
-                                    <th>Prazo</th>
-                                    <th>Status</th>
-                                    <th>Arquivo</th>
-                                </tr>
-                            </thead>
-                            <tbody id="dadosBody"></tbody>
-                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        let allData = [];
-        let filteredData = [];
-        let loadedFiles = [];
-        let charts = {};
+<!-- Toast notifications -->
+<div id="toastContainer" style="position: fixed; bottom: 1rem; right: 1rem; z-index: 1060;"></div>
 
-        // ============ UPLOAD ============
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-
-        uploadArea.addEventListener('click', () => fileInput.click());
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            handleFiles(e.dataTransfer.files);
-        });
-
-        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
-
-        async function handleFiles(files) {
-            for (const file of files) {
-                try {
-                    const data = await processFile(file);
-                    allData.push(...data);
-                    loadedFiles.push(file.name);
-                    showToast(`✅ ${file.name} carregado com sucesso!`);
-                } catch (error) {
-                    showToast(`❌ Erro ao processar ${file.name}`, 'error');
-                    console.error(error);
-                }
-            }
-            updateUI();
-        }
-
-        async function processFile(file) {
-            const ext = file.name.toLowerCase();
-            
-            if (ext.endsWith('.zip')) {
-                return await processZIP(file);
-            } else if (ext.endsWith('.xlsx') || ext.endsWith('.xls')) {
-                return processXLSX(file);
-            } else if (ext.endsWith('.json')) {
-                return processJSON(file);
-            }
-            return [];
-        }
-
-        async function processZIP(file) {
-            const zip = new JSZip();
-            const zipData = await zip.loadAsync(file);
-            let allRecords = [];
-
-            for (const [name, zipFile] of Object.entries(zipData.files)) {
-                if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
-                    const data = await zipFile.async('arraybuffer');
-                    const records = processXLSX({ name, data });
-                    allRecords.push(...records);
-                }
-            }
-            return allRecords;
-        }
-
-        function processXLSX(fileObj) {
-            const data = fileObj.data || new Uint8Array(await fileObj.arrayBuffer());
-            const workbook = XLSX.read(data, { type: 'array', cellDates: true });
-            
-            let sheetName = 'Performance_Geral';
-            if (!workbook.SheetNames.includes(sheetName)) {
-                sheetName = workbook.SheetNames[0];
-            }
-
-            const worksheet = workbook.Sheets[sheetName];
-            const rows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
-
-            return rows.map(row => ({
-                codigo: String(row['Codigo'] || row['codigo'] || '').trim(),
-                destino: String(row['Destino'] || row['destino'] || row['Unidade Destino'] || '').trim(),
-                uf: String(row['UF'] || row['uf'] || '').trim(),
-                regiao: String(row['Região'] || row['Regiao'] || row['regiao'] || '').trim(),
-                prazo: calculatePrazo(row),
-                status: String(row['Status'] || row['status'] || '').trim(),
-                arquivo: fileObj.name || 'desconhecido'
-            })).filter(r => r.codigo);
-        }
-
-        function calculatePrazo(row) {
-            // Tentar coluna Prazo direta
-            if (row['Prazo']) {
-                const p = String(row['Prazo']).trim().toLowerCase();
-                if (p.includes('fora')) return 'Fora do Prazo';
-                if (p.includes('dentro')) return 'Dentro do Prazo';
-            }
-
-            // Tentar calcular por data
-            if (row['Dt Entrega'] && row['Previsao']) {
-                try {
-                    const entrega = new Date(row['Dt Entrega']);
-                    const previsao = new Date(row['Previsao']);
-                    return entrega <= previsao ? 'Dentro do Prazo' : 'Fora do Prazo';
-                } catch (e) {}
-            }
-
-            return '';
-        }
-
-        function processJSON(file) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        resolve(Array.isArray(data) ? data : []);
-                    } catch {
-                        resolve([]);
-                    }
-                };
-                reader.readAsText(file);
-            });
-        }
-
-        // ============ UI UPDATE ============
-        function updateUI() {
-            if (allData.length === 0) {
-                document.getElementById('emptyState').style.display = 'block';
-                document.getElementById('overviewContent').style.display = 'none';
-                document.getElementById('filesList').style.display = 'none';
-                return;
-            }
-
-            document.getElementById('emptyState').style.display = 'none';
-            document.getElementById('overviewContent').style.display = 'block';
-            document.getElementById('filesList').style.display = 'block';
-
-            updateKPIs();
-            updateCharts();
-            updateTables();
-            updateFilters();
-            updateFilesList();
-        }
-
-        function updateKPIs() {
-            const total = allData.length;
-            const dentro = allData.filter(r => r.prazo === 'Dentro do Prazo').length;
-            const fora = allData.filter(r => r.prazo === 'Fora do Prazo').length;
-
-            const html = `
-                <div class="kpi-card">
-                    <div class="kpi-label">Total de Remessas</div>
-                    <div class="kpi-value">${total.toLocaleString('pt-BR')}</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">No Prazo</div>
-                    <div class="kpi-value" style="color: #10b981;">${dentro.toLocaleString('pt-BR')}</div>
-                    <div class="kpi-percent">${((dentro/total)*100).toFixed(1)}%</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">Fora do Prazo</div>
-                    <div class="kpi-value" style="color: #f87171;">${fora.toLocaleString('pt-BR')}</div>
-                    <div class="kpi-percent">${((fora/total)*100).toFixed(1)}%</div>
-                </div>
-            `;
-            document.getElementById('kpiGrid').innerHTML = html;
-        }
-
-        function updateCharts() {
-            // Chart Região
-            const byRegiao = {};
-            allData.forEach(r => {
-                if (!byRegiao[r.regiao]) byRegiao[r.regiao] = { dentro: 0, fora: 0 };
-                if (r.prazo === 'Dentro do Prazo') byRegiao[r.regiao].dentro++;
-                else if (r.prazo === 'Fora do Prazo') byRegiao[r.regiao].fora++;
-            });
-
-            const regioes = Object.keys(byRegiao).filter(r => r);
-            const dentroPorRegiao = regioes.map(r => byRegiao[r].dentro);
-            const foraPorRegiao = regioes.map(r => byRegiao[r].fora);
-
-            if (charts.chartRegiao) charts.chartRegiao.destroy();
-            charts.chartRegiao = new Chart(document.getElementById('chartRegiao'), {
-                type: 'bar',
-                data: {
-                    labels: regioes,
-                    datasets: [
-                        {
-                            label: 'No Prazo',
-                            data: dentroPorRegiao,
-                            backgroundColor: '#10b981'
-                        },
-                        {
-                            label: 'Fora do Prazo',
-                            data: foraPorRegiao,
-                            backgroundColor: '#f87171'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#e2e8f0' } } },
-                    scales: {
-                        y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } },
-                        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148, 163, 184, 0.1)' } }
-                    }
-                }
-            });
-
-            // Chart Geral
-            const totalDentro = allData.filter(r => r.prazo === 'Dentro do Prazo').length;
-            const totalFora = allData.filter(r => r.prazo === 'Fora do Prazo').length;
-
-            if (charts.chartGeral) charts.chartGeral.destroy();
-            charts.chartGeral = new Chart(document.getElementById('chartGeral'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['No Prazo', 'Fora do Prazo'],
-                    datasets: [{
-                        data: [totalDentro, totalFora],
-                        backgroundColor: ['#10b981', '#f87171']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#e2e8f0' } } }
-                }
-            });
-        }
-
-        function updateTables() {
-            // Unidades
-            const byUnidade = {};
-            allData.forEach(r => {
-                if (!byUnidade[r.destino]) {
-                    byUnidade[r.destino] = { total: 0, dentro: 0, fora: 0, regiao: r.regiao, uf: r.uf };
-                }
-                byUnidade[r.destino].total++;
-                if (r.prazo === 'Dentro do Prazo') byUnidade[r.destino].dentro++;
-                else if (r.prazo === 'Fora do Prazo') byUnidade[r.destino].fora++;
-            });
-
-            const unidades = Object.entries(byUnidade)
-                .filter(([k]) => k)
-                .map(([nome, stats]) => ({ nome, ...stats }))
-                .sort((a, b) => b.fora - a.fora);
-
-            let html = '';
-            unidades.forEach(u => {
-                const pctFora = ((u.fora / u.total) * 100).toFixed(1);
-                html += `
-                    <tr>
-                        <td>${u.nome}</td>
-                        <td>${u.total}</td>
-                        <td><span class="status-dentro">${u.dentro}</span></td>
-                        <td><span class="status-fora">${u.fora}</span></td>
-                        <td>${pctFora}%</td>
-                        <td>${u.regiao}</td>
-                        <td>${u.uf}</td>
-                    </tr>
-                `;
-            });
-            document.getElementById('unidadesBody').innerHTML = html;
-
-            // Regiões
-            const byRegiao = {};
-            allData.forEach(r => {
-                if (!byRegiao[r.regiao]) byRegiao[r.regiao] = { total: 0, dentro: 0, fora: 0 };
-                byRegiao[r.regiao].total++;
-                if (r.prazo === 'Dentro do Prazo') byRegiao[r.regiao].dentro++;
-                else if (r.prazo === 'Fora do Prazo') byRegiao[r.regiao].fora++;
-            });
-
-            html = '';
-            Object.entries(byRegiao).filter(([k]) => k).forEach(([regiao, stats]) => {
-                const pctFora = ((stats.fora / stats.total) * 100).toFixed(1);
-                html += `
-                    <tr>
-                        <td>${regiao}</td>
-                        <td>${stats.total}</td>
-                        <td><span class="status-dentro">${stats.dentro}</span></td>
-                        <td><span class="status-fora">${stats.fora}</span></td>
-                        <td>${pctFora}%</td>
-                        <td>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${pctFora}%"></div>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
-            document.getElementById('regioesBody').innerHTML = html;
-
-            // Estados
-            const byUF = {};
-            allData.forEach(r => {
-                if (!byUF[r.uf]) byUF[r.uf] = { total: 0, dentro: 0, fora: 0 };
-                byUF[r.uf].total++;
-                if (r.prazo === 'Dentro do Prazo') byUF[r.uf].dentro++;
-                else if (r.prazo === 'Fora do Prazo') byUF[r.uf].fora++;
-            });
-
-            html = '';
-            Object.entries(byUF).filter(([k]) => k).forEach(([uf, stats]) => {
-                const pctFora = ((stats.fora / stats.total) * 100).toFixed(1);
-                html += `
-                    <tr>
-                        <td>${uf}</td>
-                        <td>${stats.total}</td>
-                        <td><span class="status-dentro">${stats.dentro}</span></td>
-                        <td><span class="status-fora">${stats.fora}</span></td>
-                        <td>${pctFora}%</td>
-                        <td>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${pctFora}%"></div>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
-            document.getElementById('estadosBody').innerHTML = html;
-
-            // Dados Brutos
-            html = '';
-            allData.slice(0, 100).forEach(r => {
-                const statusClass = r.prazo === 'Dentro do Prazo' ? 'status-dentro' : 'status-fora';
-                html += `
-                    <tr>
-                        <td>${r.codigo}</td>
-                        <td>${r.destino}</td>
-                        <td>${r.uf}</td>
-                        <td>${r.regiao}</td>
-                        <td><span class="${statusClass}">${r.prazo}</span></td>
-                        <td>${r.status}</td>
-                        <td><small>${r.arquivo}</small></td>
-                    </tr>
-                `;
-            });
-            document.getElementById('dadosBody').innerHTML = html;
-        }
-
-        function updateFilters() {
-            const regioes = [...new Set(allData.map(r => r.regiao).filter(r => r))];
-            const ufs = [...new Set(allData.map(r => r.uf).filter(r => r))];
-
-            let html = '<option value="all">Todas</option>';
-            regioes.forEach(r => html += `<option value="${r}">${r}</option>`);
-            document.getElementById('filterRegiao').innerHTML = html;
-
-            html = '<option value="all">Todos</option>';
-            ufs.forEach(u => html += `<option value="${u}">${u}</option>`);
-            document.getElementById('filterUF').innerHTML = html;
-        }
-
-        function updateFilesList() {
-            let html = '';
-            loadedFiles.forEach((f, i) => {
-                html += `<div class="file-item">${f} <span class="remove" onclick="removeFile(${i})">✕</span></div>`;
-            });
-            document.getElementById('filesContainer').innerHTML = html;
-        }
-
-        function removeFile(index) {
-            loadedFiles.splice(index, 1);
-            updateFilesList();
-        }
-
-        function applyFilters() {
-            const regiao = document.getElementById('filterRegiao').value;
-            const uf = document.getElementById('filterUF').value;
-            const prazo = document.getElementById('filterPrazo').value;
-            const search = document.getElementById('searchCodigo').value.toLowerCase();
-
-            filteredData = allData.filter(r => {
-                if (regiao !== 'all' && r.regiao !== regiao) return false;
-                if (uf !== 'all' && r.uf !== uf) return false;
-                if (prazo !== 'all' && r.prazo !== prazo) return false;
-                if (search && !r.codigo.includes(search)) return false;
-                return true;
-            });
-
-            updateTables();
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(tab).classList.add('active');
-            event.target.classList.add('active');
-        }
-
-        function sortTable(table, col) {
-            // Implementar ordenação simples
-            showToast('Ordenação em desenvolvimento', 'error');
-        }
-
-        function exportXLSX() {
-            if (allData.length === 0) {
-                showToast('Nenhum dado para exportar', 'error');
-                return;
-            }
-
-            const ws = XLSX.utils.json_to_sheet(allData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Dados');
-            XLSX.writeFile(wb, `performance_${new Date().toISOString().slice(0,10)}.xlsx`);
-            showToast('✅ Exportado como XLSX');
-        }
-
-        function exportJSON() {
-            if (allData.length === 0) {
-                showToast('Nenhum dado para exportar', 'error');
-                return;
-            }
-
-            const json = JSON.stringify(allData, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `performance_${new Date().toISOString().slice(0,10)}.json`;
-            a.click();
-            showToast('✅ Exportado como JSON');
-        }
-
-        function clearAllData() {
-            if (confirm('Tem certeza que deseja limpar todos os dados?')) {
-                allData = [];
-                filteredData = [];
-                loadedFiles = [];
-                updateUI();
-                showToast('✅ Dados limpos');
-            }
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-    </script>
+<script src="js/app.js"></script>
 </body>
 </html>
